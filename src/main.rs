@@ -1,33 +1,23 @@
-//! # MenuBar Sample
-//!
-//! This sample demonstrates how to use Menus/MenuBars and MenuItems in Windows.
-//!
-//! /!\ This is different from the system menu bar (which are preferred) available in `gio::Menu`!
-
-use gio;
-use glib;
-use gtk;
-use libappindicator;
-
-use gio::prelude::*;
-use glib::clone;
+use crate::error::{CliResult, ErrorKind, Result, ResultExt};
 use gtk::prelude::*;
-use gtk::{
-    AboutDialog, AccelFlags, AccelGroup, ApplicationWindow, CheckMenuItem, IconSize, Image, Label,
-    Menu, MenuBar, MenuItem, WindowPosition,
-};
+use gtk::{AboutDialog, CheckMenuItem, Menu, MenuItem, Orientation, Separator};
 use libappindicator::*;
 
+mod error;
+mod sys;
+
 fn main() {
-    gtk::init();
+    gtk::init().unwrap();
 
     let mut tray = AppIndicator::new("Surface Control Tray", "rust");
 
     let mut menu = Menu::new();
+    let performance = MenuItem::with_label("Performance");
+    let dgpu = MenuItem::with_label("Enable GPU");
+    let latch = MenuItem::with_label("Detach");
     let about = MenuItem::with_label("About");
     let quit = MenuItem::with_label("Quit");
 
-    let performance = MenuItem::with_label("Performance");
     let performance_menu = Menu::new();
     let performance_normal = CheckMenuItem::with_label("Normal");
     let performance_battery_saver = CheckMenuItem::with_label("Battery Saver");
@@ -39,8 +29,19 @@ fn main() {
     performance_menu.append(&performance_better_performance);
     performance_menu.append(&performance_best_performance);
     performance.set_submenu(Some(&performance_menu));
-    menu.append(&performance);
 
+    let seperator_1 = Separator::new(Orientation::Vertical);
+    let seperator_2 = Separator::new(Orientation::Vertical);
+    let menu_seperator_1 = MenuItem::new();
+    let menu_seperator_2 = MenuItem::new();
+    menu_seperator_1.add(&seperator_1);
+    menu_seperator_2.add(&seperator_2);
+
+    menu.append(&performance);
+    menu.append(&dgpu);
+    menu.append(&menu_seperator_1);
+    menu.append(&latch);
+    menu.append(&menu_seperator_2);
     menu.append(&about);
     menu.append(&quit);
 
@@ -56,16 +57,29 @@ fn main() {
         p.set_title("About!");
         p.show_all();
     });
-    // check_item.connect_toggled(|w| {
-    //     w.set_label(if w.get_active() {
-    //         "Checked"
-    //     } else {
-    //         "Unchecked"
-    //     });
-    // });
+
+    dgpu.connect_activate(|w| {
+        let enabled = w.get_label().unwrap() == "Disable dGPU";
+        w.set_label(if enabled {
+            "Enable dGPU"
+        } else {
+            "Disable dGPU"
+        });
+        set_dgpu(enabled);
+    });
 
     tray.set_status(AppIndicatorStatus::Active);
     tray.set_menu(&mut menu);
     menu.show_all();
     gtk::main();
+}
+
+fn set_dgpu(enabled: bool) {
+    let set_ps = if enabled {
+        sys::dgpu::PowerState::Off
+    } else {
+        sys::dgpu::PowerState::On
+    };
+    let dev = sys::dgpu::Device::open().unwrap();
+    dev.set_power(set_ps).unwrap();
 }
