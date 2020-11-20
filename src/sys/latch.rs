@@ -6,7 +6,7 @@ use nix::{ioctl_none, ioctl_read};
 
 use crate::error::{Error, ErrorKind, Result, ResultExt};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum OpMode {
     Tablet,
     Laptop,
