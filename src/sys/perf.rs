@@ -25,6 +25,16 @@ impl Mode {
         }
     }
 
+    pub fn from_int(i: u32) -> Option<Self> {
+        match i {
+            1 => Some(Mode::Normal),
+            2 => Some(Mode::Battery),
+            3 => Some(Mode::Perf1),
+            4 => Some(Mode::Perf2),
+            _ => None,
+        }
+    }
+
     pub fn short_str(self) -> &'static str {
         match self {
             Mode::Normal => "1",
