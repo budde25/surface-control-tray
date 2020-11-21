@@ -1,9 +1,8 @@
 use std::fs::OpenOptions;
-use std::path::{Path, PathBuf};
 use std::io::{Read, Write};
+use std::path::{Path, PathBuf};
 
 use crate::error::{Error, ErrorKind, Result, ResultExt};
-
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PowerState {
@@ -15,15 +14,29 @@ impl PowerState {
     pub fn from_str(s: &str) -> Option<Self> {
         match s {
             "0" | "off" => Some(PowerState::Off),
-            "1" | "on"  => Some(PowerState::On),
-            _           => None,
+            "1" | "on" => Some(PowerState::On),
+            _ => None,
+        }
+    }
+
+    pub fn from_bool(b: bool) -> Self {
+        match b {
+            false => PowerState::Off,
+            true => PowerState::On,
         }
     }
 
     pub fn as_str(self) -> &'static str {
         match self {
             PowerState::Off => "off",
-            PowerState::On  => "on",
+            PowerState::On => "on",
+        }
+    }
+
+    pub fn as_bool(self) -> bool {
+        match self {
+            PowerState::Off => false,
+            PowerState::On => true,
         }
     }
 }
@@ -33,7 +46,6 @@ impl std::fmt::Display for PowerState {
         write!(fmt, "{}", self.as_str())
     }
 }
-
 
 #[derive(Debug)]
 pub struct InvalidPowerStateError;
@@ -46,7 +58,6 @@ impl std::str::FromStr for PowerState {
     }
 }
 
-
 pub struct Device {
     path: PathBuf,
 }
@@ -58,7 +69,9 @@ impl Device {
 
     pub fn open_path<P: AsRef<Path>>(path: P) -> Result<Self> {
         if path.as_ref().is_dir() {
-            Ok(Device { path: path.as_ref().to_owned() })
+            Ok(Device {
+                path: path.as_ref().to_owned(),
+            })
         } else {
             Err(failure::err_msg("Surface dGPU hot-plug device not found"))
                 .context(ErrorKind::DeviceAccess)
@@ -80,11 +93,11 @@ impl Device {
 
         let state = CStr::from_bytes_with_nul(&buf[0..len])
             .context(ErrorKind::InvalidData)?
-            .to_str().context(ErrorKind::InvalidData)?
+            .to_str()
+            .context(ErrorKind::InvalidData)?
             .trim();
 
-        PowerState::from_str(state)
-            .ok_or_else(|| Error::from(ErrorKind::InvalidData))
+        PowerState::from_str(state).ok_or_else(|| Error::from(ErrorKind::InvalidData))
     }
 
     pub fn set_power(&self, state: PowerState) -> Result<()> {
