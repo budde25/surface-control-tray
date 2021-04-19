@@ -1,0 +1,10 @@
+[Unit]
+Description=Surface Control Tray
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/surface-control-tray
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
