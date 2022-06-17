@@ -1,10 +1,8 @@
 use super::error::Result;
 use super::sys;
 use glib::Receiver;
-use gtk::{
-    AboutDialog, AboutDialogExt, CheckMenuItem, CheckMenuItemExt, ContainerExt, GtkMenuItemExt,
-    GtkWindowExt, Menu, MenuItem, MenuShellExt, Orientation, Separator, WidgetExt,
-};
+use gtk::prelude::*;
+use gtk::{AboutDialog, CheckMenuItem, Menu, MenuItem, Orientation, Separator};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
 use notify::{watcher, RecursiveMode, Watcher};
 use std::process::Command;
@@ -63,7 +61,7 @@ pub fn build_ui() {
     });
 
     dgpu.connect_activate(|w| {
-        let enabled = w.get_label().unwrap() == "Disable dGPU";
+        let enabled = w.label().unwrap() == "Disable dGPU";
         w.set_label(if enabled {
             "Enable dGPU"
         } else {
@@ -73,27 +71,27 @@ pub fn build_ui() {
     });
 
     performance_normal.connect_activate(|w| {
-        if w.get_active() {
+        if w.is_active() {
             set_performance(1);
             w.set_sensitive(false);
         }
     });
 
     performance_battery_saver.connect_activate(|w| {
-        if w.get_active() {
+        if w.is_active() {
             set_performance(2);
             w.set_sensitive(false);
         }
     });
 
     performance_better.connect_activate(|w| {
-        if w.get_active() {
+        if w.is_active() {
             set_performance(3);
             w.set_sensitive(false);
         }
     });
     performance_best.connect_activate(|w| {
-        if w.get_active() {
+        if w.is_active() {
             set_performance(4);
             w.set_sensitive(false);
         }

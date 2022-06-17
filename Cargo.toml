@@ -3,20 +3,18 @@ name = "surface-control-tray"
 version = "0.1.0"
 authors = ["budde25 <ethan@ebudd.io>"]
 edition = "2018"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-gio = "0.9"
-glib = "0.10"
-gtk = "0.9"
-gdk = "0.13"
-libappindicator = "0.5"
+anyhow = "1.0.57"
+crossbeam-channel = "0.5.5"
+dbus = "0.9.5"
+dbus-crossroads = "0.5.0"
 failure = "0.1.8"
-nix = "0.19.0"
-crossbeam-channel = "0.5.0"
-notify = "4.0"
-anyhow = "1.0"
-dbus = "0.9"
-dbus-crossroads = "0.3"
+gdk = "0.15.4"
+gio = "0.15.11"
+glib = "0.15.11"
+gtk = "0.15.5"
+libappindicator = "0.7.0"
+nix = "0.24.1"
+notify = "4.0.17"
